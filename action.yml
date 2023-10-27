@@ -1,0 +1,45 @@
+apiVersion: automation.cloudbees.io/v1alpha1
+kind: action
+name: upload-s3-object
+inputs:
+  file-path:  # id of input
+    description: 'Local File Path'
+    required: true
+  bucket-name:  # id of input
+    description: 'bucket name'
+    required: true
+  s3-path:  # id of input
+    description: 's3 path containing object'
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: s3-action-upload
+      name: s3-action-upload
+      uses: docker://amazon/aws-cli
+      shell: bash
+      run: |
+        set -x
+
+        bucketname="${{ inputs.bucket-name }}"
+        s3path="${{ inputs.s3-path }}"
+
+        s3uri="$bucketname"
+
+        # if bucketname does not have s3:// prefix 
+        if [[ $bucketname != s3://* ]]; then
+           bucketname="s3://$bucketname"
+        fi 
+
+        #if s3path does not start with /
+        if [[ $s3path != /* ]]; then
+           s3path="/$s3path"
+        fi 
+        
+        # final s3url
+        s3uri="$bucketname$s3path"
+
+        echo $s3uri
+
+        aws s3 cp  ${{ inputs.file-path }} $s3uri
+ 

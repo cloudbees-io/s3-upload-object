@@ -1,0 +1,56 @@
+= CloudBees action: Store an object on Amazon S3
+
+Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
+
+== Inputs
+
+[cols="2a,1a,1a,3a",options="header"]
+.Input details
+|===
+
+| Input name
+| Data type
+| Required?
+| Description
+
+| `bucket-name`
+| String
+| Yes
+| The Amazon S3 bucket name.
+
+| `file-path`
+| String
+| Yes
+| The local file path of the object to be uploaded.
+
+| `s3-path`
+| String
+| Yes
+| The Amazon S3 destination path for the upload.
+
+|===
+
+== Usage example
+
+In your YAML file, add:
+
+[source,yaml]
+----
+
+      - name: Upload to Amazon S3
+        uses: cloudbees-io/s3-upload-object@v1
+        with:
+          file-path: "/local-image.tar"
+          bucket-name: "Amazon_S3_bucket_name"
+          s3-path: "amazon-s3-image.tar"
+----
+
+== License
+
+This code is made available under the 
+link:https://opensource.org/license/mit/[MIT license].
+
+== References
+
+* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform-actions/latest/[using actions in CloudBees workflows].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform/latest/[the CloudBees platform].
