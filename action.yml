@@ -41,5 +41,5 @@ runs:
 
         echo $s3uri
 
-        aws s3 cp  ${{ inputs.file-path }} $s3uri
+        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive
  
