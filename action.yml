@@ -46,7 +46,7 @@ runs:
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
-        content: |
+        content: |-
           |----|----|
           |Local file|S3}
           ${{ steps.s3-action-upload.outputs.uploads }}
