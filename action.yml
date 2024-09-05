@@ -41,12 +41,14 @@ runs:
 
         echo $s3uri
 
-        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | awk '{print "| " $2 " | " $4 " |"}' > "$CLOUDBEES_OUTPUTS/uploads"
+        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee /tmp/aws_response.txt
+        grep upload: /tmp/aws_response.txt | awk '{print "| " $2 " | " $4 " |"}' > "$CLOUDBEES_OUTPUTS/uploads"
         
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
         content: |-
+          # S3 Upload results
           |----|----|
           |Local file|S3}
           ${{ steps.s3-action-upload.outputs.uploads }}
