@@ -48,16 +48,16 @@ runs:
       uses: docker://golang:1.20.3-alpine3.17
       shell: sh
       run: |
-        grep upload: "${{cloudbees.workspace}}/aws_response.txt" | awk '{print "| " $2 " | " $4 " |"}' | tee "$CLOUDBEES_OUTPUTS/uploads"
+        grep upload: "${{cloudbees.workspace}}/aws_response.txt" | sed 's/.*upload: //' | awk '{print "| " $1 " | " $3 " |"}' | tee "$CLOUDBEES_OUTPUTS/uploads"
         
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
         content: |-
           # S3 Upload results
-          |----|----|
-          |Local file|S3|
+          | ---- | ---- |
+          | Local file | S3 |
           ${{ steps.process-response.outputs.uploads }}
-          |----|----|
+          | ---- | ---- |
 
  
