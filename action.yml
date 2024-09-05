@@ -41,14 +41,14 @@ runs:
 
         echo $s3uri
 
-        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee /tmp/aws_response.txt
+        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee "${{cloudbees.workspace}}/aws_response.txt"
         
     - name: Process response
       id: process-response
       uses: docker://golang:1.20.3-alpine3.17
       shell: sh
       run: |
-        grep upload: /tmp/aws_response.txt | awk '{print "| " $2 " | " $4 " |"}' | tee "$CLOUDBEES_OUTPUTS/uploads"
+        grep upload: "${{cloudbees.workspace}}/aws_response.txt" | awk '{print "| " $2 " | " $4 " |"}' | tee "$CLOUDBEES_OUTPUTS/uploads"
         
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
