@@ -42,6 +42,7 @@ runs:
         echo $s3uri
 
         aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee /tmp/aws_response.txt
+        which awk
         grep upload: /tmp/aws_response.txt | awk '{print "| " $2 " | " $4 " |"}' > "$CLOUDBEES_OUTPUTS/uploads"
         cat "$CLOUDBEES_OUTPUTS/uploads"
         
