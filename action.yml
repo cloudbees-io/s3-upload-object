@@ -42,6 +42,12 @@ runs:
         echo $s3uri
 
         aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee /aws/aws_response.txt
+        
+    - name: Process response
+      id: process-response
+      uses: docker://golang:1.20.3-alpine3.17
+      shell: sh
+      run: |
         grep upload: /aws/aws_response.txt | awk '{print "| " $2 " | " $4 " |"}' | tee "$CLOUDBEES_OUTPUTS/uploads"
         
     - name: publish-evidence
@@ -51,7 +57,7 @@ runs:
           # S3 Upload results
           |----|----|
           |Local file|S3|
-          ${{ steps.s3-action-upload.outputs.uploads }}
+          ${{ steps.process-response.outputs.uploads }}
           |----|----|
 
  
