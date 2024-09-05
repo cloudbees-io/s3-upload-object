@@ -55,9 +55,6 @@ runs:
       with:
         content: |-
           # S3 Upload results
-          | ---- | ---- |
           | Local file | S3 |
+          | ---- | ---- |         
           ${{ steps.process-response.outputs.uploads }}
-          | ---- | ---- |
-
- 
