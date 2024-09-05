@@ -41,5 +41,8 @@ runs:
 
         echo $s3uri
 
-        aws s3 cp ${{ inputs.file-path }} $s3uri --recursive
- 
+        if [ -f ${{ inputs.file-path }} ]; then
+          aws s3 cp ${{ inputs.file-path }} $s3uri
+        elif [ -d ${{ inputs.file-path }} ]; then
+          aws s3 cp ${{ inputs.file-path }} $s3uri --recursive
+        fi 
