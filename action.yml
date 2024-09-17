@@ -42,7 +42,18 @@ runs:
         echo $s3uri
 
         if [ -f ${{ inputs.file-path }} ]; then
-          aws s3 cp ${{ inputs.file-path }} $s3uri
+          aws s3 cp ${{ inputs.file-path }} $s3uri | tee "${{cloudbees.workspace}}/aws_response.txt"
         elif [ -d ${{ inputs.file-path }} ]; then
-          aws s3 cp ${{ inputs.file-path }} $s3uri --recursive
+          aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee "${{cloudbees.workspace}}/aws_response.txt"
         fi 
+        grep upload: "${{cloudbees.workspace}}/aws_response.txt" | sed 's/.*upload: //' | awk '{print "| " $1 " | " $3 " |"}' | tee "$CLOUDBEES_OUTPUTS/s3_upload_evidence"
+    
+    - name: publish-evidence
+      uses: cloudbees-io/publish-evidence-item@v1
+      with:
+        content: |-
+          # S3 Upload results
+          | Local file | S3 |
+          | ---- | ---- |         
+          ${{ steps.s3-action-upload.outputs.s3_upload_evidence }}
+
