@@ -28,6 +28,21 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 | Yes
 | The Amazon S3 destination path for the upload.
 
+| `send-artifact-info`
+| String
+| Yes
+| If set to `true`, publishes Build Artifact information to CloudBees CI.
+
+| `artifact-name`
+| String
+| No
+| If `send-artifact-info` is `true`, specify the name of the artifact. If not provided, the file name/folder name is used.
+
+| `artifact-version`
+| String
+| No
+| If `send-artifact-info` is `true`, specify the version of the artifact. If not provided, a default value of `-` is used.
+
 |===
 
 == Usage example
@@ -43,6 +58,22 @@ In your YAML file, add:
           file-path: "/local-image.tar"
           bucket-name: "Amazon_S3_bucket_name"
           s3-path: "amazon-s3-image.tar"
+          send-artifact-info: "false"
+----
+
+If you want to publish build artifact information, set `send-artifact-info` to `true` and optionally provide `artifact-name` and `artifact-version`:
+
+[source,yaml]
+----
+      - name: Upload to Amazon S3 with Artifact Info
+        uses: cloudbees-io/s3-upload-object@v1
+        with:
+          file-path: "/local-image.tar"
+          bucket-name: "Amazon_S3_bucket_name"
+          s3-path: "amazon-s3-image.tar"
+          send-artifact-info: "true"
+          artifact-name: "my-artifact-name"  # Optional, defaults to the file name if not provided
+          artifact-version: "1.0.0"  # Optional, defaults to "-" if not provided
 ----
 
 == License
