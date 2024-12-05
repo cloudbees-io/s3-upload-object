@@ -30,8 +30,8 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 
 | `send-artifact-info`
 | String
-| Yes
-| If set to `true`, publishes Build Artifact information to CloudBees CI.
+| No
+| If set to `true`, publishes artifact information to CloudBees Platform.
 
 | `artifact-name`
 | String
