@@ -43,6 +43,21 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 | No
 | If `send-artifact-info` is `true`, specify the version of the artifact. If not provided, a default value of `-` is used.
 
+| `send-artifact-info`
+| Boolean
+| No
+| Enable to send artifact information to the Cloudbees Platform for artifact traceability purposes. Default value is `false`.
+
+| `artifact-name`
+| String
+| No
+| The name of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
+
+| `artifact-version`
+| String
+| No
+| The version of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
+
 |===
 
 == Usage example
