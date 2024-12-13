@@ -29,7 +29,7 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 | The Amazon S3 destination path for the upload.
 
 | `send-artifact-info`
-| string
+| String
 | No
 | Enable to send artifact information to the Cloudbees Platform for artifact traceability purposes.
 
