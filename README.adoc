@@ -1,7 +1,6 @@
 = CloudBees action: Store an object on Amazon S3
 
-Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
-
+Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3). This action also reports artifact related data to the workflow run for artifact traceability purposes.
 == Inputs
 
 [cols="2a,1a,1a,3a",options="header"]
