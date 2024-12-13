@@ -67,6 +67,7 @@ runs:
           file_name=$(basename "${{ inputs.file-path }}")
           file_type="file"
           aws s3 cp ${{ inputs.file-path }} $s3uri | tee "${{cloudbees.workspace}}/aws_response.txt"
+          etag=$(aws s3api head-object --bucket ${{ inputs.bucket-name }} --key ${{ inputs.s3-path }} --query 'ETag' --output text)
         elif [ -d "${{ inputs.file-path }}" ]; then
           file_name=$(basename "${{ inputs.file-path }}")
           file_type="folder"
@@ -98,23 +99,30 @@ runs:
 
           echo "Publishing build artifact information"
 
+          # Construct the basic JSON payload
+          json_payload='{
+            "runId": "'"$RUN_ID"'",
+            "runAttempt": '"$RUN_ATTEMPT"',
+            "name": "'"$imgName"'",
+            "version": "'"$imgVer"'",
+            "url": "'"$destination"'",
+            "type": "'"$artifact_type"'"
+          }'
+
+          # If $etag is not empty, add the "digest" field directly to the JSON
+         if [[ -n "$etag" ]]; then
+           json_payload=$(echo "$json_payload" | sed "s/}$/,\n  \"digest\": \"${etag//\"/}\" \n}/")
+         fi
+
           # API call to publish artifact info
           response=$(curl --fail-with-body -X 'POST' "$CLOUDBEES_API_URL/v2/workflows/runs/artifactinfos" \
             -H "Authorization: Bearer $CLOUDBEES_API_TOKEN" \
             -H 'Content-Type: application/json' \
-            --data-binary '{
-              "runId": "'"$RUN_ID"'",
-              "runAttempt": '"$RUN_ATTEMPT"',
-              "name": "'"$imgName"'",
-              "version": "'"$imgVer"'",
-              "url": "'"$destination"'",
-              "type": "'"$artifact_type"'"
-            }') || command_failed=1
+            --data-binary "$json_payload") || command_failed=1
 
           # Check curl exit code
           if [ ${command_failed:-0} -eq 1 ]; then
-            echo "Platform API call failed with error '$response'"
-            exit 1
+            echo "WARN: failed to save artifact information: '$response'"
           else
             echo "Artifact details pushed to platform successfully"
           fi
