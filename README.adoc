@@ -1,6 +1,6 @@
 = CloudBees action: Store an object on Amazon S3
 
-Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
+Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3). This action also reports artifact related data to the workflow run for artifact traceability purposes.
 
 == Inputs
 
@@ -31,17 +31,17 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 | `send-artifact-info`
 | String
 | No
-| If set to `true`, publishes Build Artifact information to CloudBees Platform.
+| Enable to send artifact information to the Cloudbees Platform for artifact traceability purposes.
 
 | `artifact-name`
 | String
 | No
-| If `send-artifact-info` is `true`, specify the name of the artifact. If not provided, the file name/folder name is used.
+| The name of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
 
 | `artifact-version`
 | String
 | No
-| If `send-artifact-info` is `true`, specify the version of the artifact. If not provided, a default value of `-` is used.
+| The version of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
 
 |===
 
