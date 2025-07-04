@@ -129,14 +129,13 @@ runs:
             echo "WARN: failed to save artifact information: '$response'"
           else
             echo "Artifact details pushed to platform successfully"
+            
+            # Extract the artifactId
+            id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+          
+            # Set it as an output
+            printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
           fi
-          
-          # Extract the artifactId
-          id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
-          
-          # Set it as an output
-          printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
-        
         else
           echo "Artifact information not sent to Platform"
         fi    
