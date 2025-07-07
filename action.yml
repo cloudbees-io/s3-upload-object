@@ -21,6 +21,10 @@ inputs:
   artifact-version:  # Optional input for artifact version
     description: 'Version of the artifact'
     required: false
+outputs:
+  artifact-id:
+    value: ${{ steps.s3-action-upload.outputs.artifact-id }}
+    description: "The unique identifier of the artifact."
 runs:
   using: composite
   steps:
@@ -125,6 +129,12 @@ runs:
             echo "WARN: failed to save artifact information: '$response'"
           else
             echo "Artifact details pushed to platform successfully"
+            
+            # Extract the artifactId
+            id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
+          
+            # Set it as an output
+            printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
           fi
         else
           echo "Artifact information not sent to Platform"
