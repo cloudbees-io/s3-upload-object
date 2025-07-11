@@ -1,6 +1,7 @@
 = CloudBees action: Store an object on Amazon S3
 
-Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3). This action also reports artifact related data to the workflow run for artifact traceability purposes.
+Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
+This action also reports artifact-related data to the workflow run for artifact traceability purposes.
 
 == Inputs
 
@@ -28,21 +29,25 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 | Yes
 | The Amazon S3 destination path for the upload.
 
-| `send-artifact-info`
-| String
-| No
-| Enable to send artifact information to the Cloudbees Platform for artifact traceability purposes.
-
 | `artifact-name`
 | String
 | No
-| The name of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
+| The name of the artifact to send to the Cloudbees platform.
+Default value is `false`.
+Defaults to the filename if not provided.
 
 | `artifact-version`
 | String
 | No
-| The version of the artifact to send to the Cloudbees Platform for artifact traceability purposes.
+| The version of the artifact to send to the Cloudbees platform.
+Default value is `false`.
+Defaults to `-` if not provided.
 
+| `send-artifact-info`
+| Boolean
+| No
+| If `true`, sends artifact information to the Cloudbees platform for artifact traceability purposes.
+Default value is `false`.
 |===
 
 == Outputs
@@ -57,39 +62,83 @@ Use this action to upload an object file to Amazon Simple Storage Service (Amazo
 
 | `artifact-id`
 | String
-| The unique identifier of the artifact.
+| The unique identifier of the artifact reported to the CloudBees platform.
 
 |===
 
-== Usage example
+== Usage examples
 
-In your YAML file, add:
+The following is a basic example of using the action:
 
 [source,yaml]
 ----
-
       - name: Upload to Amazon S3
         uses: cloudbees-io/s3-upload-object@v1
         with:
-          file-path: "/local-image.tar"
-          bucket-name: "Amazon_S3_bucket_name"
-          s3-path: "amazon-s3-image.tar"
-          send-artifact-info: "false"
+          bucket-name: amazon-s3-bucket-name
+          file-path: my-local/my-image.tar
+          s3-path: my-amazon-s3/s3-image.tar
+
 ----
 
-If you want to publish build artifact information, set `send-artifact-info` to `true` and optionally provide `artifact-name` and `artifact-version`:
+=== Using optional inputs
 
-[source,yaml]
+The following example specifies optional inputs to report artifact data to the workflow run.
+
+[source,yaml,role="default-expanded"]
 ----
-      - name: Upload to Amazon S3 with Artifact Info
+      - name: Upload to Amazon ECR
         uses: cloudbees-io/s3-upload-object@v1
         with:
-          file-path: "/local-image.tar"
-          bucket-name: "Amazon_S3_bucket_name"
-          s3-path: "amazon-s3-image.tar"
-          send-artifact-info: "true"
-          artifact-name: "my-artifact-name"  # Optional, defaults to the file name if not provided
-          artifact-version: "1.0.0"  # Optional, defaults to "-" if not provided
+          bucket-name: my-image.tar
+          file-path: /local-path
+          s3-path: my-path/to-destination
+          artifact-name: my-artifact
+          artifact-version: 1.0.0
+          send-artifact-info: true
+----
+
+
+=== Full workflow example
+
+The following workflow example:
+
+* Checks out source code from a repository.
+* Uses the action to upload a file to Amazon S3.
+* Prints the artifact ID of the uploaded file.
+
+[source,yaml,role="default-expanded"]
+----
+
+name: s3-upload-file
+kind: workflow
+apiVersion: automation.cloudbees.io/v1alpha1
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  upload-file-job:
+    steps:
+      - name: checkout-source-code
+        uses: cloudbees-io/checkout@v1
+      - name: S3 upload file
+        id: s3-upload
+        uses: cloudbees-io/s3-upload-object@v1
+        with:
+          bucket-name: my-repo/my-bucket/test.zip
+          file-path: ${{ cloudbees.workspace }}/my-files/for-upload.zip
+          s3-path: ${{ vars.S3_URL }}
+          artifact-name: my-artifact
+          artifact-version: 1.0.0
+          send-artifact-info: true
+      - name: Print output parameter artifact ID from S3 upload action
+        uses: docker://alpine:latest
+        shell: sh
+        run: |
+          echo "artifact ID for my-artifact:1.0.0 at my-repo/my-bucket/test.zip is: ${{ steps.s3-upload.outputs.artifact-id }}"
+
 ----
 
 == License
@@ -99,5 +148,5 @@ link:https://opensource.org/license/mit/[MIT license].
 
 == References
 
-* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform-actions/latest/[using actions in CloudBees workflows].
-* Learn about link:https://docs.cloudbees.com/docs/cloudbees-saas-platform/latest/[the CloudBees platform].
+* Learn more about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/actions[using actions in CloudBees workflows].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/[the CloudBees platform].
