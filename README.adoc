@@ -3,6 +3,15 @@
 Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
 This action also reports artifact-related data to the workflow run for artifact traceability purposes.
 
+
+== Automatic artifact data reporting
+
+This action link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/artifacts[reports artifact-related data] to the workflow run for artifact traceability purposes.
+
+Do *not* include the link:https://github.com/cloudbees-io/register-build-artifact[`register-build-artifact` action] in the same job, as the resulting run would register duplicate artifact entries to CloudBees platform.
+
+You must specify `send-artifact-info: true` in order to send artifact data to CloudBees platform.
+
 == Inputs
 
 [cols="2a,1a,1a,3a",options="header"]
@@ -32,21 +41,21 @@ This action also reports artifact-related data to the workflow run for artifact 
 | `artifact-name`
 | String
 | No
-| The name of the artifact to send to the Cloudbees platform.
+| The name of the artifact to send to Cloudbees platform.
 Default value is `false`.
 Defaults to the filename if not provided.
 
 | `artifact-version`
 | String
 | No
-| The version of the artifact to send to the Cloudbees platform.
+| The version of the artifact to send to Cloudbees platform.
 Default value is `false`.
 Defaults to `-` if not provided.
 
 | `send-artifact-info`
 | Boolean
 | No
-| If `true`, sends artifact information to the Cloudbees platform for artifact traceability purposes.
+| If `true`, sends artifact information to Cloudbees platform for artifact traceability purposes.
 Default value is `false`.
 |===
 
@@ -62,7 +71,7 @@ Default value is `false`.
 
 | `artifact-id`
 | String
-| The unique identifier of the artifact reported to the CloudBees platform.
+| The unique identifier of the artifact reported to CloudBees platform.
 
 |===
 
@@ -149,4 +158,4 @@ link:https://opensource.org/license/mit/[MIT license].
 == References
 
 * Learn more about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/actions[using actions in CloudBees workflows].
-* Learn about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/[the CloudBees platform].
+* Learn about link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/[CloudBees platform].
