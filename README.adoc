@@ -3,12 +3,11 @@
 Use this action to upload an object file to Amazon Simple Storage Service (Amazon S3).
 This action also reports artifact-related data to the workflow run for artifact traceability purposes.
 
-
 == Automatic artifact data reporting
 
 This action link:https://docs.cloudbees.com/docs/cloudbees-platform/latest/workflows/artifacts[reports artifact-related data] to the workflow run for artifact traceability purposes.
 
-Do *not* include the link:https://github.com/cloudbees-io/register-build-artifact[`register-build-artifact` action] for the same artifact version, as the resulting run would register duplicate artifact entries to CloudBees platform.
+Do not include the link:https://github.com/cloudbees-io/register-build-artifact[`register-build-artifact` action] for the same artifact version, as the resulting run would register duplicate artifact entries to CloudBees platform.
 
 You must specify `send-artifact-info: true` in order to send artifact data to CloudBees platform.
 
