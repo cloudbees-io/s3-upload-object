@@ -40,21 +40,21 @@ You must specify `send-artifact-info: true` in order to send artifact data to Cl
 | `artifact-name`
 | String
 | No
-| The name of the artifact to send to Cloudbees platform.
+| The name of the artifact to send to CloudBees platform.
 Default value is `false`.
 Defaults to the filename if not provided.
 
 | `artifact-version`
 | String
 | No
-| The version of the artifact to send to Cloudbees platform.
+| The version of the artifact to send to CloudBees platform.
 Default value is `false`.
 Defaults to `-` if not provided.
 
 | `send-artifact-info`
 | Boolean
 | No
-| If `true`, sends artifact information to Cloudbees platform for artifact traceability purposes.
+| If `true`, sends artifact information to CloudBees platform for artifact traceability purposes.
 Default value is `false`.
 |===
 
