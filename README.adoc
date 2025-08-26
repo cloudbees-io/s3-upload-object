@@ -56,6 +56,24 @@ Defaults to `-` if not provided.
 | No
 | If `true`, sends artifact information to CloudBees platform for artifact traceability purposes.
 Default value is `false`.
+
+| `commit`
+| String
+| No
+| The commit ID from the source repository, used when registering the build artifact in CloudBees platform.
+Default is `${{ cloudbees.scm.sha }}`.
+
+| `repository-url`
+| String
+| No
+| The clone URL of the source repository, used when registering the build artifact in CloudBees platform.
+Default is `${{ cloudbees.scm.repositoryUrl }}`.
+
+| `ref`
+| String
+| No
+| The ref or branch of the source repository, used when registering the build artifact in CloudBees platform.
+Default is `${{ cloudbees.scm.ref }}`.
 |===
 
 == Outputs

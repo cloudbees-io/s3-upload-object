@@ -21,6 +21,22 @@ inputs:
   artifact-version:  # Optional input for artifact version
     description: 'Version of the artifact'
     required: false
+  commit:
+    description:
+      The commit ID from the source repository, used when registering the build artifact in CloudBees platform.
+    default: ${{ cloudbees.scm.sha }}
+    required: false
+  repository-url:
+    description: >
+        The clone URL of the source repository, used when registering the build artifact in CloudBees platform.
+    default: ${{ cloudbees.scm.repositoryUrl }}
+    required: false
+  ref:
+    description: >
+        The ref or branch of the source repository, used when registering the build artifact in CloudBees platform.
+    default: ${{ cloudbees.scm.ref }}
+    required: false
+
 outputs:
   artifact-id:
     value: ${{ steps.s3-action-upload.outputs.artifact-id }}
@@ -100,7 +116,11 @@ runs:
           fi
 
           destination="$s3uri"
-
+        
+          commit="${{ inputs.commit }}"
+          repository_url="${{ inputs.repository-url }}"
+          ref="${{ inputs.ref }}"
+        
           echo "Publishing build artifact information"
 
           # Construct the basic JSON payload
@@ -110,7 +130,12 @@ runs:
             "name": "'"$imgName"'",
             "version": "'"$imgVer"'",
             "url": "'"$destination"'",
-            "type": "'"$artifact_type"'"
+            "type": "'"$artifact_type"'".
+            "commit": {
+              "repositoryUrl": "'"$repository_url"'",
+              "commitId": "'"$commit"'",
+              "ref": "'"$ref"'"
+            }
           }'
 
           # If $etag is not empty, add the "digest" field directly to the JSON
