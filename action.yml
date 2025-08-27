@@ -144,16 +144,17 @@ runs:
          fi
 
           # API call to publish artifact info
-          response=$(curl --fail-with-body -X 'POST' "$CLOUDBEES_API_URL/v2/workflows/runs/artifactinfos" \
+          response=$(curl --retry-delay 5 --retry 3 --retry-connrefused --fail-with-body -X 'POST' "$CLOUDBEES_API_URL/v3/artifactinfos" \
             -H "Authorization: Bearer $CLOUDBEES_API_TOKEN" \
             -H 'Content-Type: application/json' \
             --data-binary "$json_payload") || command_failed=1
 
           # Check curl exit code
           if [ ${command_failed:-0} -eq 1 ]; then
-            echo "WARN: failed to save artifact information: '$response'"
+            echo "ERROR: failed to save artifact information: '$response'"
+            exit 1
           else
-            echo "Artifact details pushed to platform successfully"
+            echo "Artifact details pushed to CloudBees platform successfully"
             
             # Extract the artifactId
             id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
@@ -162,7 +163,10 @@ runs:
             printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
           fi
         else
-          echo "Artifact information not sent to Platform"
+          echo "Artifact information not sent to CloudBees platform"
+          # Output an empty artifact-id output parameter when 
+          # no artifact version info is registered with CloudBees platform
+          echo "" > $CLOUDBEES_OUTPUTS/artifact-id
         fi    
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
