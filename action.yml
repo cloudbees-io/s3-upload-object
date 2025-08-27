@@ -130,17 +130,16 @@ runs:
             "name": "'"$imgName"'",
             "version": "'"$imgVer"'",
             "url": "'"$destination"'",
-            "type": "'"$artifact_type"'".
+            "type": "'"$artifact_type"'",
             "commit": {
               "repositoryUrl": "'"$repository_url"'",
               "commitId": "'"$commit"'",
               "ref": "'"$ref"'"
-            }
-          }'
+            }}'
 
           # If $etag is not empty, add the "digest" field directly to the JSON
          if [[ -n "$etag" ]]; then
-           json_payload=$(echo "$json_payload" | sed "s/}$/,\n  \"digest\": \"${etag//\"/}\" \n}/")
+           json_payload=$(echo "$json_payload" | sed "s/}}$/},\n  \"digest\": \"${etag//\"/}\" \n}/")
          fi
 
           # API call to publish artifact info
