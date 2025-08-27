@@ -22,7 +22,7 @@ inputs:
     description: 'Version of the artifact'
     required: false
   commit:
-    description:
+    description: >
       The commit ID from the source repository, used when registering the build artifact in CloudBees platform.
     default: ${{ cloudbees.scm.sha }}
     required: false
