@@ -126,9 +126,9 @@ runs:
 
           # Check curl exit code
           if [ ${command_failed:-0} -eq 1 ]; then
-            echo "WARN: failed to save artifact information: '$response'"
+            echo "ERROR: failed to save artifact information: '$response'"
           else
-            echo "Artifact details pushed to platform successfully"
+            echo "Artifact details pushed to CloudBees platform successfully"
             
             # Extract the artifactId
             id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
@@ -137,7 +137,10 @@ runs:
             printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
           fi
         else
-          echo "Artifact information not sent to Platform"
+          echo "Artifact information not sent to CloudBees platform"
+          # Output an empty artifact-id output parameter when 
+          # no artifact version info is registered with CloudBees platform
+          echo "" > $CLOUDBEES_OUTPUTS/artifact-id
         fi    
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
