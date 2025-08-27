@@ -127,6 +127,7 @@ runs:
           # Check curl exit code
           if [ ${command_failed:-0} -eq 1 ]; then
             echo "ERROR: failed to save artifact information: '$response'"
+            exit 1
           else
             echo "Artifact details pushed to CloudBees platform successfully"
             
