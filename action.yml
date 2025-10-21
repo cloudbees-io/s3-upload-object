@@ -36,6 +36,10 @@ inputs:
         The ref or branch of the source repository, used when registering the build artifact in CloudBees platform.
     default: ${{ cloudbees.scm.ref }}
     required: false
+  component-id:
+    description: >
+      The ID of the component associated with the artifact. If not provided, the artifact is registered with the component of the current workflow run.
+    default: ${{ cloudbees.component.id }}
 
 outputs:
   artifact-id:
@@ -120,6 +124,7 @@ runs:
           commit="${{ inputs.commit }}"
           repository_url="${{ inputs.repository-url }}"
           ref="${{ inputs.ref }}"
+          component_id="${{ inputs.component-id }}"
         
           echo "Publishing build artifact information"
 
@@ -131,6 +136,7 @@ runs:
             "version": "'"$imgVer"'",
             "url": "'"$destination"'",
             "type": "'"$artifact_type"'",
+            "componentId": "'"$component_id"'",
             "commit": {
               "repositoryUrl": "'"$repository_url"'",
               "commitId": "'"$commit"'",
@@ -166,7 +172,7 @@ runs:
           # Output an empty artifact-id output parameter when 
           # no artifact version info is registered with CloudBees platform
           echo "" > $CLOUDBEES_OUTPUTS/artifact-id
-        fi    
+        fi
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
