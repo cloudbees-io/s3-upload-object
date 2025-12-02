@@ -122,6 +122,7 @@ runs:
           
                # If $etag is not empty
                if [[ -n "$etag" ]]; then
+                etag=${etag//\"/}
                 printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
                fi
              fi
