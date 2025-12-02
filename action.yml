@@ -43,7 +43,7 @@ inputs:
 
 outputs:
   artifact-id:
-    value: ${{ steps.s3-action-upload.outputs.artifact-id }}
+    value: ${{ steps.registerArtifact.outputs.artifact-id }}
     description: "The unique identifier of the artifact."
 runs:
   using: composite
