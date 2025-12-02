@@ -128,7 +128,7 @@ runs:
              fi
     - id: registerArtifact
       name: Register Build Artifact
-      if: ${{ inputs.send-artifact-info == 'true' }}
+      if: ${{ inputs.send-artifact-info == true }}
       uses: cloudbees-io/register-build-artifact@v2
       with:
         name: ${{ steps.s3-action-upload.outputs.image-name }}
