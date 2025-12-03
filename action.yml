@@ -124,7 +124,7 @@ runs:
           etag=${etag//\"/}
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
-       fi
+        fi
     - id: register-artifact
       name: Register Build Artifact
       if: ${{ inputs.send-artifact-info == 'true' }}
