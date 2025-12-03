@@ -125,6 +125,8 @@ runs:
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
         fi
+    - name: Debug send-artifact-info
+      run: echo "send-artifact-info=${{ inputs.send-artifact-info }}"
     - id: register-artifact
       name: Register Build Artifact
       if: ${{ inputs.send-artifact-info == 'true' }}
