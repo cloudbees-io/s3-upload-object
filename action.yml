@@ -124,9 +124,11 @@ runs:
           etag=${etag//\"/}
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
+        
+        printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
         fi
     - id: register-artifact
-      if: ${{ inputs.send-artifact-info == 'true' }}
+      if: ${{ steps.s3-action-upload.outputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
