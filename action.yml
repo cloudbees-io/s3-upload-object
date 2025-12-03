@@ -125,8 +125,15 @@ runs:
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
         
-        printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
+          printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
         fi
+    - id: Debug-Outputs
+      name: Debug Outputs
+      uses: docker://alpine:latest
+      shell: bash
+      run: |
+        set -x
+        echo "send-artifact-info: ${{ steps.s3-action-upload.outputs.send-artifact-info }}"
     - id: register-artifact
       if: ${{ steps.s3-action-upload.outputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
