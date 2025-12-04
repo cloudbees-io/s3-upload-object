@@ -151,7 +151,7 @@ runs:
         repository-url: ${{ inputs.repository-url }}
         digest: ${{ steps.s3-action-upload.outputs.digest }}
         component-id: ${{ inputs.component-id }}
-        type: ${{ steps.s3-action-upload.outputs.artifact-type }}
+        #type: ${{ steps.s3-action-upload.outputs.artifact-type }}
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
