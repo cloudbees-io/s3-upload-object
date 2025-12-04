@@ -128,8 +128,8 @@ runs:
          # If $etag is not empty
          if [[ -n "$etag" ]]; then
           etag=${etag//\"/}
-          printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
+         printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
         fi
     - id: register-artifact
       if: ${{ inputs.send-artifact-info == 'true' }}
