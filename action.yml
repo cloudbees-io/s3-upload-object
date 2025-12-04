@@ -106,8 +106,6 @@ runs:
           artifact_name="$file_name"
         fi
 
-        printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
-        
         # Handle Artifact API call only if `send-artifact-info` is true
         if [[ "${{ inputs.send-artifact-info }}" == "true" ]]; then
           # Prepare API payload
@@ -137,9 +135,9 @@ runs:
       uses: docker://esolang/jq:latest
       run: |
         set -x
-        echo "send-artifact-info: ${{ steps.s3-action-upload.outputs.send-artifact-info }}"
+        echo "send-artifact-info: ${{ inputs.send-artifact-info }}"
     - id: register-artifact
-      if: ${{ steps.s3-action-upload.outputs.send-artifact-info }}
+      if: ${{ inputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
