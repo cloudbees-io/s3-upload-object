@@ -90,14 +90,23 @@ runs:
         if [ -f "${{ inputs.file-path }}" ]; then
           file_name=$(basename "${{ inputs.file-path }}")
           file_type="file"
+
+          # Upload the file to S3
           aws s3 cp ${{ inputs.file-path }} $s3uri | tee "${{cloudbees.workspace}}/aws_response.txt"
+        
           # The etag variable is only set when uploading a file, but not when uploading a directory. 
           # This means the digest output will be empty for directory uploads when send-artifact-info is true.
           etag=$(aws s3api head-object --bucket ${{ inputs.bucket-name }} --key ${{ inputs.s3-path }} --query 'ETag' --output text)
+        
         elif [ -d "${{ inputs.file-path }}" ]; then
+          file_type="folder"
           file_name=$(basename "${{ inputs.file-path }}")
+        
+          # Upload the directory to S3
           aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee "${{cloudbees.workspace}}/aws_response.txt"
         fi 
+        
+        # Prepare evidence output
         grep upload: "${{cloudbees.workspace}}/aws_response.txt" | sed 's/.*upload: //' | awk '{print "| " $1 " | " $3 " |"}' | tee "$CLOUDBEES_OUTPUTS/s3_upload_evidence"
 
         # Determine the artifact name: use provided artifact name or fallback to file name
@@ -116,7 +125,7 @@ runs:
           artifact_type="folder"
         fi
 
-        # Set variables to prepare for Artifact API call
+        # Set variables for Register Artifact API call
         printf %s "$artifact_name" > $CLOUDBEES_OUTPUTS/artifact-name
         printf %s "$artifact_version" > $CLOUDBEES_OUTPUTS/artifact-version
         printf %s "$s3uri" > $CLOUDBEES_OUTPUTS/destination
@@ -127,7 +136,7 @@ runs:
           etag=${etag//\"/}
         fi
         printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
-        
+
     - id: register-artifact
       if: ${{ inputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
@@ -141,7 +150,7 @@ runs:
         repository-url: ${{ inputs.repository-url }}
         digest: ${{ steps.s3-action-upload.outputs.digest }}
         component-id: ${{ inputs.component-id }}
-        #type: ${{ steps.s3-action-upload.outputs.artifact-type }}
+        type: ${{ steps.s3-action-upload.outputs.artifact-type }}
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
