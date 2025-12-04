@@ -137,7 +137,7 @@ runs:
         set -x
         echo "send-artifact-info: ${{ inputs.send-artifact-info }}"
     - id: register-artifact
-      if: ${{ inputs.send-artifact-info == 'true' }}
+      if: ${{ inputs.send-artifact-info == true }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
