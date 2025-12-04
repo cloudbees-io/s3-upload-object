@@ -105,40 +105,37 @@ runs:
         if [ -z "$artifact_name" ]; then
           artifact_name="$file_name"
         fi
-
-        # Handle Artifact API call only if `send-artifact-info` is true
-        if [[ "${{ inputs.send-artifact-info }}" == "true" ]]; then
-          # Prepare API payload
-          imgVer="${{ inputs.artifact-version }}"
-          if [ -z "$imgVer" ]; then
-            imgVer="-"
-          fi
+        
+        artifact_version="${{ inputs.artifact-version }}"
+        if [ -z "$artifact_version" ]; then
+          artifact_version="-"
+        fi
         
         artifact_type="file"
         if [ "$file_type" == "folder" ]; then
           artifact_type="folder"
         fi
 
-         # Set variables to prepare for Artifact API call
-         printf %s "$artifact_name" > $CLOUDBEES_OUTPUTS/image-name
-         printf %s "$imgVer" > $CLOUDBEES_OUTPUTS/image-version
-         printf %s "$s3uri" > $CLOUDBEES_OUTPUTS/destination
-         printf %s "$artifact_type" > $CLOUDBEES_OUTPUTS/artifact-type
+        # Set variables to prepare for Artifact API call
+        printf %s "$artifact_name" > $CLOUDBEES_OUTPUTS/artifact-name
+        printf %s "$artifact_version" > $CLOUDBEES_OUTPUTS/artifact-version
+        printf %s "$s3uri" > $CLOUDBEES_OUTPUTS/destination
+        printf %s "$artifact_type" > $CLOUDBEES_OUTPUTS/artifact-type
 
-         # If $etag is not empty
-         if [[ -n "$etag" ]]; then
+        # If $etag is not empty
+        if [[ -n "$etag" ]]; then
           etag=${etag//\"/}
-         fi
-         printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
         fi
+        printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
+        
     - id: register-artifact
       if: ${{ inputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
-        name: ${{ steps.s3-action-upload.outputs.image-name }}
+        name: ${{ steps.s3-action-upload.outputs.artifact-name }}
         url: ${{ steps.s3-action-upload.outputs.destination }}
-        version: ${{ steps.s3-action-upload.outputs.image-version }}
+        version: ${{ steps.s3-action-upload.outputs.artifact-version }}
         commit: ${{ inputs.commit }}
         ref: ${{ inputs.ref }}
         repository-url: ${{ inputs.repository-url }}
