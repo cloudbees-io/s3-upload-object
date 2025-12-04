@@ -106,6 +106,8 @@ runs:
           artifact_name="$file_name"
         fi
 
+        printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
+        
         # Handle Artifact API call only if `send-artifact-info` is true
         if [[ "${{ inputs.send-artifact-info }}" == "true" ]]; then
           # Prepare API payload
@@ -130,8 +132,6 @@ runs:
           etag=${etag//\"/}
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
-        
-          printf %s "${{ inputs.send-artifact-info }}" > $CLOUDBEES_OUTPUTS/send-artifact-info
         fi
     - name: Debug send-artifact-info
       uses: docker://esolang/jq:latest
