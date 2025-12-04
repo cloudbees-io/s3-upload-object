@@ -113,11 +113,17 @@ runs:
           if [ -z "$imgVer" ]; then
             imgVer="-"
           fi
+        
+        artifact_type="file"
+        if [ "$file_type" == "folder" ]; then
+          artifact_type="folder"
+        fi
 
          # Set variables to prepare for Artifact API call
          printf %s "$artifact_name" > $CLOUDBEES_OUTPUTS/image-name
          printf %s "$imgVer" > $CLOUDBEES_OUTPUTS/image-version
          printf %s "$s3uri" > $CLOUDBEES_OUTPUTS/destination
+         printf %s "$artifact_type" > $CLOUDBEES_OUTPUTS/artifact-type
 
          # If $etag is not empty
          if [[ -n "$etag" ]]; then
@@ -145,6 +151,7 @@ runs:
         repository-url: ${{ inputs.repository-url }}
         digest: ${{ steps.s3-action-upload.outputs.digest }}
         component-id: ${{ inputs.component-id }}
+        type: ${{ steps.s3-action-upload.outputs.artifact-type }}
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
