@@ -139,7 +139,7 @@ runs:
         set -x
         echo "send-artifact-info: ${{ steps.s3-action-upload.outputs.send-artifact-info }}"
     - id: register-artifact
-      if: ${{ steps.s3-action-upload.outputs.send-artifact-info == 'true' }}
+      if: ${{ steps.s3-action-upload.outputs.send-artifact-info }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
