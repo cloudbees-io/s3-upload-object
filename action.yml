@@ -131,13 +131,8 @@ runs:
           printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
          fi
         fi
-    - name: Debug send-artifact-info
-      uses: docker://esolang/jq:latest
-      run: |
-        set -x
-        echo "send-artifact-info: ${{ inputs.send-artifact-info }}"
     - id: register-artifact
-      if: ${{ inputs.send-artifact-info == true }}
+      if: ${{ inputs.send-artifact-info == 'true' }}
       name: Register Build Artifact
       uses: cloudbees-io/register-build-artifact@v2
       with:
