@@ -2,23 +2,23 @@ apiVersion: automation.cloudbees.io/v1alpha1
 kind: action
 name: upload-s3-object
 inputs:
-  file-path:  # id of input
+  file-path: # id of input
     description: 'Local File Path'
     required: true
-  bucket-name:  # id of input
+  bucket-name: # id of input
     description: 'bucket name'
     required: true
-  s3-path:  # id of input
+  s3-path: # id of input
     description: 's3 path containing object'
     required: true
   send-artifact-info: # id of input
     default: 'false'
     description: 'Send artifact information flag'
     required: true
-  artifact-name:  # Optional input for artifact name
+  artifact-name: # Optional input for artifact name
     description: 'Name of the artifact'
     required: false
-  artifact-version:  # Optional input for artifact version
+  artifact-version: # Optional input for artifact version
     description: 'Version of the artifact'
     required: false
   commit:
@@ -28,12 +28,12 @@ inputs:
     required: false
   repository-url:
     description: >
-        The clone URL of the source repository, used when registering the build artifact in CloudBees platform.
+      The clone URL of the source repository, used when registering the build artifact in CloudBees platform.
     default: ${{ cloudbees.scm.repositoryUrl }}
     required: false
   ref:
     description: >
-        The ref or branch of the source repository, used when registering the build artifact in CloudBees platform.
+      The ref or branch of the source repository, used when registering the build artifact in CloudBees platform.
     default: ${{ cloudbees.scm.ref }}
     required: false
   component-id:
@@ -43,7 +43,7 @@ inputs:
 
 outputs:
   artifact-id:
-    value: ${{ steps.s3-action-upload.outputs.artifact-id }}
+    value: ${{ steps.register-artifact.outputs.artifact-id }}
     description: "The unique identifier of the artifact."
 runs:
   using: composite
@@ -90,13 +90,23 @@ runs:
         if [ -f "${{ inputs.file-path }}" ]; then
           file_name=$(basename "${{ inputs.file-path }}")
           file_type="file"
+
+          # Upload the file to S3
           aws s3 cp ${{ inputs.file-path }} $s3uri | tee "${{cloudbees.workspace}}/aws_response.txt"
+        
+          # The etag variable is only set when uploading a file, but not when uploading a directory. 
+          # This means the digest output will be empty for directory uploads when send-artifact-info is true.
           etag=$(aws s3api head-object --bucket ${{ inputs.bucket-name }} --key ${{ inputs.s3-path }} --query 'ETag' --output text)
+        
         elif [ -d "${{ inputs.file-path }}" ]; then
-          file_name=$(basename "${{ inputs.file-path }}")
           file_type="folder"
+          file_name=$(basename "${{ inputs.file-path }}")
+        
+          # Upload the directory to S3
           aws s3 cp ${{ inputs.file-path }} $s3uri --recursive | tee "${{cloudbees.workspace}}/aws_response.txt"
         fi 
+        
+        # Prepare evidence output
         grep upload: "${{cloudbees.workspace}}/aws_response.txt" | sed 's/.*upload: //' | awk '{print "| " $1 " | " $3 " |"}' | tee "$CLOUDBEES_OUTPUTS/s3_upload_evidence"
 
         # Determine the artifact name: use provided artifact name or fallback to file name
@@ -104,75 +114,44 @@ runs:
         if [ -z "$artifact_name" ]; then
           artifact_name="$file_name"
         fi
-
-        # Handle Artifact API call only if `send-artifact-info` is true
-        if [[ "${{ inputs.send-artifact-info }}" == "true" ]]; then
-          # Prepare API payload
-          imgName="$artifact_name"
-          imgVer="${{ inputs.artifact-version }}"
-          if [ -z "$imgVer" ]; then
-            imgVer="-"
-          fi
-
-          artifact_type="file"
-          if [ "$file_type" == "folder" ]; then
-            artifact_type="folder"
-          fi
-
-          destination="$s3uri"
         
-          commit="${{ inputs.commit }}"
-          repository_url="${{ inputs.repository-url }}"
-          ref="${{ inputs.ref }}"
-          component_id="${{ inputs.component-id }}"
-        
-          echo "Publishing build artifact information"
-
-          # Construct the basic JSON payload
-          json_payload='{
-            "runId": "'"$RUN_ID"'",
-            "runAttempt": '"$RUN_ATTEMPT"',
-            "name": "'"$imgName"'",
-            "version": "'"$imgVer"'",
-            "url": "'"$destination"'",
-            "type": "'"$artifact_type"'",
-            "componentId": "'"$component_id"'",
-            "commit": {
-              "repositoryUrl": "'"$repository_url"'",
-              "commitId": "'"$commit"'",
-              "ref": "'"$ref"'"
-            }}'
-
-          # If $etag is not empty, add the "digest" field directly to the JSON
-         if [[ -n "$etag" ]]; then
-           json_payload=$(echo "$json_payload" | sed "s/}}$/},\n  \"digest\": \"${etag//\"/}\" \n}/")
-         fi
-
-          # API call to publish artifact info
-          response=$(curl --retry-delay 5 --retry 3 --retry-connrefused --fail-with-body -X 'POST' "$CLOUDBEES_API_URL/v3/artifactinfos" \
-            -H "Authorization: Bearer $CLOUDBEES_API_TOKEN" \
-            -H 'Content-Type: application/json' \
-            --data-binary "$json_payload") || command_failed=1
-
-          # Check curl exit code
-          if [ ${command_failed:-0} -eq 1 ]; then
-            echo "ERROR: failed to save artifact information: '$response'"
-            exit 1
-          else
-            echo "Artifact details pushed to CloudBees platform successfully"
-            
-            # Extract the artifactId
-            id=$(echo "$response" | grep -o '"id": *"[^"]*"' | sed 's/.*"id": *"\([^"]*\)".*/\1/')
-          
-            # Set it as an output
-            printf %s "$id" > $CLOUDBEES_OUTPUTS/artifact-id
-          fi
-        else
-          echo "Artifact information not sent to CloudBees platform"
-          # Output an empty artifact-id output parameter when 
-          # no artifact version info is registered with CloudBees platform
-          echo "" > $CLOUDBEES_OUTPUTS/artifact-id
+        artifact_version="${{ inputs.artifact-version }}"
+        if [ -z "$artifact_version" ]; then
+          artifact_version="-"
         fi
+        
+        artifact_type="file"
+        if [ "$file_type" == "folder" ]; then
+          artifact_type="folder"
+        fi
+
+        # Set variables for Register Artifact API call
+        printf %s "$artifact_name" > $CLOUDBEES_OUTPUTS/artifact-name
+        printf %s "$artifact_version" > $CLOUDBEES_OUTPUTS/artifact-version
+        printf %s "$s3uri" > $CLOUDBEES_OUTPUTS/destination
+        printf %s "$artifact_type" > $CLOUDBEES_OUTPUTS/artifact-type
+
+        # If $etag is not empty
+        if [[ -n "$etag" ]]; then
+          etag=${etag//\"/}
+        fi
+        printf %s "$etag" > $CLOUDBEES_OUTPUTS/digest
+        printf %s "" > $CLOUDBEES_OUTPUTS/artifact-id
+
+    - id: register-artifact
+      if: ${{ inputs.send-artifact-info == 'true' }}
+      name: Register Build Artifact
+      uses: cloudbees-io/register-build-artifact@v2
+      with:
+        name: ${{ steps.s3-action-upload.outputs.artifact-name }}
+        url: ${{ steps.s3-action-upload.outputs.destination }}
+        version: ${{ steps.s3-action-upload.outputs.artifact-version }}
+        commit: ${{ inputs.commit }}
+        ref: ${{ inputs.ref }}
+        repository-url: ${{ inputs.repository-url }}
+        digest: ${{ steps.s3-action-upload.outputs.digest }}
+        component-id: ${{ inputs.component-id }}
+        type: ${{ steps.s3-action-upload.outputs.artifact-type }}
     - name: publish-evidence
       uses: cloudbees-io/publish-evidence-item@v1
       with:
