@@ -1,0 +1,59 @@
+name: s3-upload-object
+kind: workflow
+apiVersion: automation.cloudbees.io/v1alpha1
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  s3-upload-object-job:
+    steps:
+      - name: checkout Source Code
+        uses: cloudbees-io/checkout@v1
+
+      - name: configure aws credentials
+        uses: cloudbees-io/configure-aws-credentials@v1
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.CB_ACTIONS_TEST_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.CB_ACTIONS_TEST_AWS_SECRET_KEY }}
+
+      - name: s3 upload object file
+        id: s3-upload-object-create-artifact
+        uses: cloudbees-io/s3-upload-object@v1
+        with:
+          file-path: ${{ cloudbees.workspace }}/s3-test/testfile.txt
+          bucket-name: cloudbees-saas-preprod-trufflehog-test-actions-logs
+          s3-path: s3-file/image_1.tar
+          send-artifact-info: true
+          artifact-name: s3-testfile
+          artifact-version: ${{ cloudbees.version }}
+
+      - name: Verify artifact creation
+        uses: docker://amazon/aws-cli:2.15.49
+        run: |
+          set -x
+          aws s3api head-object --bucket cloudbees-saas-preprod-trufflehog-test-actions-logs --key s3-file/image_1.tar
+          echo "File s3-file/image_1.tar found successfully in S3."
+          echo "artifact-id: ${{ steps.s3-upload-object-create-artifact.outputs.artifact-id }}"
+
+      - name: s3 upload object folder
+        id: s3-upload-object-no-artifact
+        uses: cloudbees-io/s3-upload-object@v1
+        with:
+          file-path: ${{ cloudbees.workspace }}/s3-test/
+          bucket-name: cloudbees-saas-preprod-trufflehog-test-actions-logs
+          s3-path: s3-folder/
+          send-artifact-info: false
+
+      - name: Notify failures
+        if: ${{ failure() }}
+        uses: ./actions/notify-slack-action
+        with:
+          webhook-url: ${{ secrets.CBP_BT_SLACK_WEBHOOK_URL }}
+          # action name (as per cloudbees-io) and this file name must be action name with .yaml extension
+          # this agreement is a prerequisite to send workflow urls in slack notifications in case of failure
+          action-name: s3-upload-object
+
